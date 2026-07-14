@@ -1,0 +1,12 @@
+.DS_Store
+__pycache__/
+*.pyc
+
+# Source documents and local-only working material are not published.
+/初級/
+/中級/
+/外部資源/
+/output/
+/tests/
+/scripts/
+/開啟題庫網站.command

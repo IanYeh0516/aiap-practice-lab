@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="AI 應用規劃師隨機題目練習網站，支援初級、中級、科目篩選、作答與解析。"
+    />
+    <title>AIAP 試煉場｜AI 應用規劃師隨機測驗</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Serif+TC:wght@500;600;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./data.js" defer></script>
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <div class="paper-grid" aria-hidden="true"></div>
+    <header class="site-header">
+      <a class="brand" href="./index.html" aria-label="回到測驗設定">
+        <span class="brand-mark">AI</span>
+        <span>
+          <strong>AIAP 試煉場</strong>
+          <small>APPLICATION PLANNER EXAM</small>
+        </span>
+      </a>
+      <div class="header-meta">
+        <span id="bank-count">讀取題庫中</span>
+        <span class="status-dot" aria-hidden="true"></span>
+        <span>本機版</span>
+      </div>
+    </header>
+
+    <main class="app-shell">
+      <section id="setup-view" class="view setup-view" aria-labelledby="setup-title">
+        <div class="hero-copy reveal">
+          <p class="eyebrow">RANDOM PRACTICE · 隨機演練</p>
+          <h1 id="setup-title">把答案<br />練成直覺。</h1>
+          <p class="hero-lead">
+            從官方學習指引的練習題隨機組卷。先作答，交卷後再看正確答案與原因解析。
+          </p>
+          <div class="hero-stats" aria-label="題庫摘要">
+            <div><strong id="hero-total">—</strong><span>解析題</span></div>
+            <div><strong>05</strong><span>考試科目</span></div>
+            <div><strong>100%</strong><span>本機運作</span></div>
+          </div>
+        </div>
+
+        <form id="exam-form" class="setup-card reveal reveal-delay" autocomplete="off">
+          <div class="ticket-edge" aria-hidden="true"></div>
+          <div class="card-heading">
+            <span>EXAM TICKET</span>
+            <strong>組卷設定</strong>
+          </div>
+
+          <fieldset>
+            <legend><span>01</span> 練習模式</legend>
+            <div class="segmented-control mode-control">
+              <label><input type="radio" name="mode" value="guide" checked /><span>解析練習</span></label>
+              <label><input type="radio" name="mode" value="past" /><span>歷屆考題</span></label>
+              <label><input type="radio" name="mode" value="wrong" /><span>錯題重測 <b id="wrong-count">0</b></span></label>
+            </div>
+            <button id="clear-wrong-button" class="text-button wrong-clear" type="button">清空錯題本</button>
+          </fieldset>
+
+          <fieldset>
+            <legend><span>02</span> 選擇級別</legend>
+            <div class="segmented-control">
+              <label>
+                <input type="radio" name="level" value="初級" checked />
+                <span>初級</span>
+              </label>
+              <label>
+                <input type="radio" name="level" value="中級" />
+                <span>中級</span>
+              </label>
+              <label>
+                <input type="radio" name="level" value="全部" />
+                <span>混合</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend><span>03</span> 選擇科目</legend>
+            <div id="subject-options" class="subject-options"></div>
+          </fieldset>
+
+          <fieldset>
+            <legend><span>04</span> 題目數量</legend>
+            <div class="count-row">
+              <div class="count-options" role="radiogroup" aria-label="題目數量">
+                <label><input type="radio" name="count" value="5" /><span>5</span></label>
+                <label><input type="radio" name="count" value="10" checked /><span>10</span></label>
+                <label><input type="radio" name="count" value="20" /><span>20</span></label>
+                <label><input type="radio" name="count" value="30" /><span>30</span></label>
+              </div>
+              <p id="available-count" class="available-count">可用 — 題</p>
+            </div>
+          </fieldset>
+
+          <button id="start-button" class="primary-button" type="submit">
+            <span>開始隨機測驗</span>
+            <span aria-hidden="true">↗</span>
+          </button>
+          <p class="keyboard-note">作答快捷鍵：數字 1–4、← → 切換題目</p>
+        </form>
+      </section>
+
+      <section id="quiz-view" class="view quiz-view" hidden aria-labelledby="quiz-heading">
+        <aside class="question-rail" aria-label="題目進度">
+          <div class="rail-heading">
+            <span>PROGRESS</span>
+            <strong id="answered-count">0 / 10</strong>
+          </div>
+          <div id="question-nav" class="question-nav"></div>
+          <div class="rail-legend">
+            <span><i class="legend-current"></i>目前</span>
+            <span><i class="legend-done"></i>已答</span>
+          </div>
+        </aside>
+
+        <div class="quiz-workspace">
+          <div class="quiz-topline">
+            <button id="exit-button" class="text-button" type="button">← 退出測驗</button>
+            <div class="quiz-clock" aria-label="作答時間">
+              <span>TIMER</span>
+              <strong id="timer">00:00</strong>
+            </div>
+          </div>
+
+          <article class="question-card">
+            <div class="question-meta">
+              <div>
+                <span id="question-level" class="level-chip">初級</span>
+                <span id="question-subject">人工智慧基礎概論</span>
+              </div>
+              <span id="question-counter">QUESTION 01 / 10</span>
+            </div>
+            <div class="question-rule" aria-hidden="true"><span id="progress-fill"></span></div>
+            <h2 id="quiz-heading" class="question-prompt"></h2>
+            <fieldset id="answer-options" class="answer-options">
+              <legend class="sr-only">選擇答案</legend>
+            </fieldset>
+            <p id="source-note" class="source-note"></p>
+          </article>
+
+          <div class="quiz-actions">
+            <button id="prev-button" class="secondary-button" type="button">← 上一題</button>
+            <button id="submit-button" class="submit-button" type="button">交卷</button>
+            <button id="next-button" class="primary-button compact" type="button">下一題 →</button>
+          </div>
+          <p id="quiz-status" class="sr-only" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <section id="result-view" class="view result-view" hidden aria-labelledby="result-title">
+        <div class="result-hero">
+          <div id="score-seal" class="score-seal">
+            <span>SCORE</span>
+            <strong id="score-percent">0</strong>
+            <small>/ 100</small>
+          </div>
+          <div>
+            <p class="eyebrow">RESULT REPORT · 成績單</p>
+            <h1 id="result-title">本次測驗完成</h1>
+            <p id="result-message" class="result-message"></p>
+            <dl class="result-stats">
+              <div><dt>答對</dt><dd id="correct-count">0 / 10</dd></div>
+              <div><dt>用時</dt><dd id="result-time">00:00</dd></div>
+              <div><dt>未作答</dt><dd id="unanswered-result">0</dd></div>
+            </dl>
+          </div>
+        </div>
+
+        <div class="result-toolbar">
+          <div class="review-filters" role="group" aria-label="解析篩選">
+            <button class="filter-button active" data-filter="all" type="button">全部</button>
+            <button class="filter-button" data-filter="wrong" type="button">只看錯題</button>
+            <button class="filter-button" data-filter="correct" type="button">只看答對</button>
+          </div>
+          <div class="result-actions">
+            <button id="retry-button" class="secondary-button" type="button">同一份再考</button>
+            <button id="new-exam-button" class="primary-button compact" type="button">重新組卷</button>
+          </div>
+        </div>
+
+        <div id="review-list" class="review-list"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>AIAP PRACTICE LAB · 2026</span>
+      <span>題目與答案整理自 iPAS 官方公開學習資源</span>
+    </footer>
+
+    <dialog id="submit-dialog" class="submit-dialog">
+      <form method="dialog">
+        <span class="dialog-kicker">FINAL CHECK</span>
+        <h2>確定要交卷嗎？</h2>
+        <p id="dialog-message">你已完成所有題目。</p>
+        <div class="dialog-actions">
+          <button class="secondary-button" value="cancel">繼續作答</button>
+          <button id="confirm-submit" class="submit-button" type="button">確認交卷</button>
+        </div>
+      </form>
+    </dialog>
+  </body>
+</html>
